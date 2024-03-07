@@ -4,9 +4,9 @@ A simple client-server application for managing messages over the TCP and UDP pr
 
 The structure of the project is as follows:
 
-list.c, list.h -> implementation of a generic singly linked list to allow storage of a variable number of clients and messages within the application;
+list.c, list.h -> implementation of a generic linked list to allow storage of a variable number of clients and messages within the application;
 
-common.c, common.h -> implementation of structures representing the messages recognized on the network and functions for sending and receiving messages over the TCP protocol:
+common.c, common.h -> implementation of structures representing the messages recognized over the network and functions for sending and receiving messages over the TCP protocol:
 send_all() and recv_all() use the basic send() and recv() functions to unify and separate the bytes sent/received into interpretable messages;
 
 subscriber.c -> implementation of a TCP client capable of sending login and subscription requests, as well as unsubscription from a specific message topic, to the server and interpreting messages received on the respective topics from the server;
@@ -15,7 +15,7 @@ subscriber.c -> implementation of a TCP client capable of sending login and subs
 server.c -> implementation of a server that receives messages through a UDP socket from UDP clients (messages with topic, data_type, and content, according to the requirement), requests from TCP clients, and forwards messages from UDP clients to the corresponding TCP clients;
 - execution: ./server <port>
 
-The store-and-forward functionality is also implemented: if a TCP client subscribes to a topic with the store-and-forward option activated (sf = 1), in case of disconnection and subsequent reconnection, it will receive the messages received by the server on that topic while it was disconnected.
+The store-and-forward functionality is also implemented: if a TCP client subscribes to a topic with the store-and-forward option activated (sf = 1), in case of disconnection and subsequent reconnection, they will receive the messages received by the server on that topic while they were disconnected.
 
 The structures of the messages over TCP are as follows:
 
