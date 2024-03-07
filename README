@@ -1,0 +1,33 @@
+CLIENT-SERVER APPLICATION OVER TCP AND UDP FOR MESSAGE MANAGEMENT
+
+A simple client-server application for managing messages over the TCP and UDP protocols has been implemented.
+
+The structure of the project is as follows:
+
+list.c, list.h -> implementation of a generic singly linked list to allow storage of a variable number of clients and messages within the application;
+
+common.c, common.h -> implementation of structures representing the messages recognized on the network and functions for sending and receiving messages over the TCP protocol:
+send_all() and recv_all() use the basic send() and recv() functions to unify and separate the bytes sent/received into interpretable messages;
+
+subscriber.c -> implementation of a TCP client capable of sending login and subscription requests, as well as unsubscription from a specific message topic, to the server and interpreting messages received on the respective topics from the server;
+- execution: ./subscriber <id> <server ip> <server port>
+
+server.c -> implementation of a server that receives messages through a UDP socket from UDP clients (messages with topic, data_type, and content, according to the requirement), requests from TCP clients, and forwards messages from UDP clients to the corresponding TCP clients;
+- execution: ./server <port>
+
+The store-and-forward functionality is also implemented: if a TCP client subscribes to a topic with the store-and-forward option activated (sf = 1), in case of disconnection and subsequent reconnection, it will receive the messages received by the server on that topic while it was disconnected.
+
+The structures of the messages over TCP are as follows:
+
+-> messages sent by the client to the server (requests) consist of a header containing metadata about the request (request type and the length of the actual data), represented by the request_header structure, followed by a data packet specific to each type of request (connect_packet - for sending the id of a newly connected client to the server, subscribe_packet - for subscribing to a certain topic, unsubscribe_packet - for unsubscribing from a topic); the entire header will be sent over the TCP connection, followed by header->len bytes (relevant ones, excluding filler bytes in strings) from the corresponding packet.
+
+-> messages sent by the server to clients (those containing information about messages received from UDP clients) are also formed from a header containing metadata about the message, represented by the content_header structure (which contains the length of the string representing the message topic, the number of bytes representing the actual data, the type of transmitted data, as well as the IP and port of the UDP client from which the message originates), followed by a payload containing the title of the message topic, followed by the message data; the entire header will be sent over the TCP connection, followed by header->topic_len bytes representing the string identifying the topic, and header->data_len bytes representing the message data (thus only bytes with information are sent, without fillers).
+
+More details about all the fields of the mentioned structures can be found in the comments in common.h.
+
+The server's "database" consists of two lists, one of subscribers and one of topics.
+The subscriber list holds data about TCP clients in data structures of type subscriber, which identify a client through the socket to which it is connected, id, IP, port, connectivity status, and any messages received while disconnected.
+
+The list of topics contains elements of type topic, which represent a specific category of messages, identified by title and a list of subscriptions. A subscription consists of a subscriber-sf pair, where the subscriber is a pointer to the subscribed client, and sf is the store-and-forward option associated with the subscription.
+
+Details of the application logic can be found in the code comments.
